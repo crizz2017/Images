@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="description" content="">
+	<meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+	<meta name="generator" content="Jekyll v4.0.1">
+	<meta http-equiv="Feature-Policy" content="'self' http://192.168.137.1:8080/" />
+	<title>Starter Template · Bootstrap</title>
+</head>
+
+<body>
+	<link href="http://192.168.137.1:8080/CleverBioID/assets/dist/css/bootstrap.css" rel="stylesheet">
+	<link rel="stylesheet" href="http://192.168.137.1:8080/CleverBioID/css/loader.css">
+
+	<style>
+		html,
+		body {
+			width: 100%;
+			height: 100%;
+		}
+
+		.bd-placeholder-img {
+			font-size: 1.125rem;
+			text-anchor: middle;
+			-webkit-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			user-select: none;
+		}
+
+		@media (min-width: 768px) {
+			.bd-placeholder-img-lg {
+				font-size: 3.5rem;
+			}
+		}
+
+		.custom-file-input:lang(en)~.custom-file-label::after {
+			display: none;
+		}
+
+		.img-fluid {
+			width: 100% !important;
+		}
+	</style>
+
+
+	<link href="http://192.168.137.1:8080/CleverBioID/css/starter-template.css" rel="stylesheet">
+
+	<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+		<h3 class="text-center text-white text-uppercase font-weight-bold" style="width: 100%;">photoverify</h3>
+	</nav>
+	<div class="loader">
+		<div class="lds-ripple">
+			<div></div>
+			<div></div>
+		</div>
+	</div>
+	<div class="container">
+		<div class="row">
+
+			<div class="col-sm-3 mb-3">
+				<div class="card">
+					<img src="./img/sin_image.jpg" class="card-img-top" id="imgID">
+					<div class="card-body">
+						<div class="input-group mb-3">
+							<div class="input-group-prepend">
+								<span class="input-group-text" id="inputGroupFileAddon01">Subir</span>
+							</div>
+							<div class="custom-file">
+								<input type="file" class="custom-file-input" id="loadFile"
+									aria-describedby="inputGroupFileAddon01" />
+								<label class="custom-file-label" for="loadFile" id="labelFile">Elegir archivo</label>
+							</div>
+						</div>
+						<h6 class="card-title">Foto de Identificación</h6>
+					</div>
+
+				</div>
+			</div>
+
+			<div class="col-sm-2 mb-4">
+				<div class="card">
+					<canvas class="img-fluid" id="copycanvas" height="400" width="280"></canvas>
+				</div>
+			</div>
+
+			<div class="col-sm-2 mb-4">
+				<div class="card">
+					<img src="./img/sin_image.jpg" class="card-img-top" id="image1">
+					<figcaption class="figure-caption">Facial 1</figcaption>
+				</div>
+			</div>
+
+			<div class="col-sm-2 mb-4">
+				<div class="card">
+					<img src="./img/sin_image.jpg" class="card-img-top" id="image2">
+					<figcaption class="figure-caption">Facial 2</figcaption>
+				</div>
+			</div>
+
+			<div class="col-sm-3">
+				<div class="btn btn-secondary btn-lg active" role="button" aria-pressed="true" id="PhotoVerify">
+					Verificar
+					Identidad</div>
+				<div id="mensaje"></div>
+			</div>
+			<div class="col-sm-12 progress" style="width: 100%; height: 110px;"></div>
+		</div>
+	</div>
+
+	<!--<script src="http://192.168.137.1:8080/CleverBioID/js/jquery-3.5.1.js"></script>--> 
+	<script src="http://192.168.137.1:8080/CleverBioID/lib/jquery/jquery.min.js"></script>
+	<script src="http://192.168.137.1:8080/CleverBioID/lib/popper.js/umd/popper.min.js"></script>
+	<script src="http://192.168.137.1:8080/CleverBioID/lib/highlight.js/highlight.min.js"></script>
+	<script src="http://192.168.137.1:8080/CleverBioID/js/getUserMedia.js"></script>
+	<script src="http://192.168.137.1:8080/CleverBioID/js/toBlob.js"></script>
+	<script src="http://192.168.137.1:8080/CleverBioID/js/circle-progress.js"></script>
+	<script src="http://192.168.137.1:8080/CleverBioID/js/valCircleProgress.js"></script>
+	<script>
+	if ('mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices) {
+		  console.log("Let's get this party started")
+		  navigator.mediaDevices.getUserMedia({video: true})
+		}
+		var inputFile = $("#loadFile");
+		var img = $("#imgID");
+
+		function readURL(input) {
+			if (input.files && input.files[0]) {
+				var reader = new FileReader();
+				reader.onload = function (e) {
+					console.log(e);
+					img.attr("src", e.target.result);
+					//img.css('background-image', 'url('+e.target.result +')');
+					img.hide();
+					img.fadeIn(650);
+				}
+				reader.readAsDataURL(input.files[0]);
+			}
+		}
+		inputFile.change(function (e) {
+			$("#labelFile").html(this.files[0].name);
+			readURL(this);
+		});
+
+	</script>
+
+	<script type="text/javascript">
+		const maxHeight = 300;
+		const motionAreaHeight = 160;
+		// The motion threshold is set by the server and 
+		// depends on whether the client is a mobile device or not. 
+		const motionThreshold = 20;
+		var template = null;
+		var capturing = false;
+		var autoCapture = false;
+		var autoCaptureTimer, captureTimer;
+		var video = document.createElement('video');
+		video.setAttribute('playsinline', '');
+		var idphoto = document.querySelector('#imgID');
+		var image1 = document.querySelector('#image1');
+		var image2 = document.querySelector('#image2');
+		var copycanvas = document.querySelector('#copycanvas');
+		var motioncanvas = document.createElement('canvas');
+
+
+		$(document).ready(function () {
+			$('#capture').on('click', function (e) {
+				capture();
+			});
+			
+			startVideo(video, initCanvases);
+
+			var host = "http://192.168.15.137:8080";
+			//host = "http://localhost:8080";
+
+			$("#PhotoVerify").click(function () {
+				$(".loader").addClass("active");
+
+				var data = new FormData();
+				data.append('liveimage0', image1.blob);
+				data.append('liveimage1', image2.blob);
+				data.append('idphoto', $('#loadFile')[0].files[0]);
+
+				jQuery.ajax({
+					url: host + '/CleverBioID/API/PhotoVerifyWebAPI',
+					data: data,
+					cache: true,
+					contentType: false,
+					processData: false,
+					method: 'POST',
+					type: 'POST', // For jQuery < 1.9
+					success: function (data) {
+						var myJSON = JSON.stringify(data);
+						console.log(myJSON);
+						$(".loader").removeClass("active");
+						$("#mensaje").append("<hr/>");
+						switch (data.accuracyLevel) {
+							case 0:
+								$("#mensaje").html("No hay semejanza con la foto de identificaci&oacute;n.");
+								break;
+							case 1:
+								$("#mensaje").html("No hay Similitud con la identidad.");
+								break;
+							case 2:
+								$("#mensaje").html("No hay Similitud con la identidad.");
+								break;
+							case 3:
+								$("#mensaje").html("No hay Similitud con la identidad.");			
+								break;
+							case 4:
+								$("#mensaje").html("Hay similitud: Tiene un parecido muy cercano, sin embargo, no es la persona de la foto de identificación.");
+								break;
+							default:
+								$("#mensaje").html("Identidad Aprobada.");
+								break;
+						}
+						
+						changeValueCircle(data.accuracyLevel);
+					}
+				});
+			});
+		});
+
+		function sendImagesPhotoVerify() {
+
+		}
+
+		function sendImages() {
+			$('#progress').css('width', '0%').attr('aria-valuenow', 0);
+			$('#progressDialog').modal('show');
+			var formData = new FormData();
+			formData.append('image1', image1.src);
+			formData.append('image2', image2.src);
+			$.ajax({
+				url: '/livedetection/process',
+				type: 'POST',
+				contentType: false,
+				processData: false,
+				data: formData,
+				xhr: function () {
+					let jqxhr = $.ajaxSettings.xhr();
+					if (jqxhr.upload) {
+						jqxhr.upload.addEventListener('progress', function (e) {
+							if (e.lengthComputable) {
+								var percentage = Math.round((e.loaded * 100) / e.total);
+								console.log('upload progress ', percentage);
+								$('#progress').css('width', percentage + '%').attr('aria-valuenow', percentage);
+							}
+						}, false);
+						jqxhr.upload.addEventListener('load', function (e) {
+							console.log('uploaded');
+							$('#progress').css('width', '100%').attr('aria-valuenow', 100);
+						}, false);
+					}
+					return jqxhr;
+				}
+			}).done(function (data, textStatus, jqXHR) {
+				console.log('upload succeeded');
+				$('#result').html(data);
+			}).fail(function (jqXHR, textStatus, errorThrown) {
+				console.log('upload failed:', textStatus, errorThrown, jqXHR.responseText);
+				$('#result').html('<div class="row mt-3"><div class="col"><pre class="text-danger">' + jqXHR.responseText + '</pre></div></div>');
+			}).always(function () {
+				console.log('hiding modal');
+				$('#progressDialog').modal('hide');
+				$('#capture').prop('disabled', false);
+				$('html, body').animate({ scrollTop: $(document).height() }, 'slow');
+			});
+		}
+
+		function capture() {
+			image1.blob = null;
+			$(image1).hide();
+			image2.blob = null;
+			$(image2).hide();
+			$('#result').empty();
+			capturing = true;
+		}
+
+		function enableProcess() {
+			var ok = idphoto.blob && image1.blob && image2.blob;
+		}
+
+		function startVideo(videoElement, successCallback) {
+			const constraints = { audio: false, video: { facingMode: "user" } };
+			navigator.mediaDevices.getUserMedia(constraints)
+				.then(function (mediaStream) {
+					console.log('Media stream created:', mediaStream.getVideoTracks()[0]);
+					videoElement.srcObject = mediaStream;
+					videoElement.onloadedmetadata = function (e) {
+						console.log('Playing live media stream');
+						videoElement.play();
+						if (successCallback) { successCallback(videoElement, mediaStream); }
+					};
+				})
+				.catch(function (err) {
+					console.log('getUserMedia() error: ', err);
+					alert(err.name + ': ' + err.message);
+				});
+
+			capture();
+		}
+
+		function handleImage1(blob) {
+			if (blob && blob.type.startsWith('image/')) {
+				console.log('Took image 1:', blob);
+				image1.blob = blob;
+				image1.src = window.URL.createObjectURL(blob);
+				image1.onload = function () {
+					window.URL.revokeObjectURL(this.src);
+				}
+				$(image1).show();
+				enableProcess();
+			}
+		}
+
+		function handleImage2(blob) {
+			if (blob && blob.type.startsWith('image/')) {
+				console.log('Took image 2:', blob);
+				image2.blob = blob;
+				image2.src = window.URL.createObjectURL(blob);
+				image2.onload = function () {
+					window.URL.revokeObjectURL(this.src);
+				}
+				$(image2).show();
+				enableProcess();
+			}
+		}
+
+		function initCanvases() {
+			// we prefer 3 : 4 face image resolution
+			let aspectratio = video.videoWidth / video.videoHeight < 3 / 4 ? video.videoWidth / video.videoHeight : 3 / 4;
+			copycanvas.height = video.videoHeight > maxHeight ? maxHeight : video.videoHeight;
+			copycanvas.width = copycanvas.height * aspectratio;
+			motioncanvas.height = motionAreaHeight;
+			motioncanvas.width = motioncanvas.height * aspectratio;
+			// mirror live preview
+			let copy = copycanvas.getContext('2d');
+			copy.translate(copycanvas.width, 0);
+			copy.scale(-1, 1);
+			// set an interval-timer to grab about 20 frames per second
+			processInterval = setInterval(processFrame, 50);
+		}
+
+		function processFrame() {
+			let x = 0, y = 0, w = copycanvas.width, h = copycanvas.height, aspectratio = w / h;
+			let cutoff = video.videoWidth - (video.videoHeight * aspectratio);
+			let copy = copycanvas.getContext('2d');
+			copy.drawImage(video, cutoff / 2, 0, video.videoWidth - cutoff, video.videoHeight, 0, 0, copycanvas.width, copycanvas.height);
+
+			if (capturing) {
+				// scale current image into the motion canvas
+				let motionctx = motioncanvas.getContext('2d');
+				motionctx.drawImage(copycanvas, copycanvas.width / 8, copycanvas.height / 8, copycanvas.width - copycanvas.width / 4, copycanvas.height - copycanvas.height / 4, 0, 0, motioncanvas.width, motioncanvas.height);
+				let currentImageData = motionctx.getImageData(0, 0, motioncanvas.width, motioncanvas.height);
+
+				if (template) {
+					let movement = motionDetection(currentImageData, template);
+					// trigger if movementPercentage is above threshold (default: when 20% of maximum movement is exceeded)
+					if (movement > motionThreshold) {
+						copycanvas.toBlob(handleImage2);
+           	 			capturing = false;
+            			template = null;
+						//image2.src = copycanvas.toDataURL();
+						console.log('captured second image');
+//						$(image2).show();
+
+						//setTimeout(sendImages);
+					}
+				} else {
+					// use as template
+					template = createTemplate(currentImageData);
+					// capture the current image
+					copycanvas.toBlob(handleImage1);
+					console.log('captured first image');
+					
+				}
+			}
+		}
+
+		// template for cross-correlation
+		function createTemplate(imageData) {
+			// cut out the template:
+			// we use a small width, quarter-size image around the center as template
+			var template = {
+				centerX: imageData.width / 2,
+				centerY: imageData.height / 2,
+				width: imageData.width / 4,
+				height: imageData.height / 4 + imageData.height / 8
+			};
+			template.xPos = template.centerX - template.width / 2;
+			template.yPos = template.centerY - template.height / 2;
+			template.buffer = new Uint8ClampedArray(template.width * template.height);
+
+			let counter = 0;
+			let p = imageData.data;
+			for (var y = template.yPos; y < template.yPos + template.height; y++) {
+				// we use only the green plane here
+				let bufferIndex = (y * imageData.width * 4) + template.xPos * 4 + 1;
+				for (var x = template.xPos; x < template.xPos + template.width; x++) {
+					let templatepixel = p[bufferIndex];
+					template.buffer[counter++] = templatepixel;
+					// we use only the green plane here
+					bufferIndex += 4;
+				}
+			}
+			console.log('Created new cross-correlation template', template);
+			return template;
+		}
+
+		// motion detection by a normalized cross-correlation
+		function motionDetection(imageData, template) {
+			// this is the major computing step: Perform a normalized cross-correlation between the template of the first image and each incoming image
+			// this algorithm is basically called "Template Matching" - we use the normalized cross correlation to be independent of lighting changes
+			// we calculate the correlation of template and image over the whole image area
+			let bestHitX = 0,
+				bestHitY = 0,
+				maxCorr = 0,
+				searchWidth = imageData.width / 4,
+				searchHeight = imageData.height / 4,
+				p = imageData.data;
+
+			for (var y = template.centerY - searchHeight; y <= template.centerY + searchHeight - template.height; y++) {
+				for (var x = template.centerX - searchWidth; x <= template.centerX + searchWidth - template.width; x++) {
+					let nominator = 0,
+						denominator = 0,
+						templateIndex = 0;
+
+					// Calculate the normalized cross-correlation coefficient for this position
+					for (var ty = 0; ty < template.height; ty++) {
+						// we use only the green plane here
+						let bufferIndex = x * 4 + 1 + (y + ty) * imageData.width * 4;
+						for (var tx = 0; tx < template.width; tx++) {
+							var imagepixel = p[bufferIndex];
+							nominator += template.buffer[templateIndex++] * imagepixel;
+							denominator += imagepixel * imagepixel;
+							// we use only the green plane here
+							bufferIndex += 4;
+						}
+					}
+
+					// The NCC coefficient is then (watch out for division-by-zero errors for pure black images):
+					let ncc = 0.0;
+					if (denominator > 0) {
+						ncc = nominator * nominator / denominator;
+					}
+					// Is it higher than what we had before?
+					if (ncc > maxCorr) {
+						maxCorr = ncc;
+						bestHitX = x;
+						bestHitY = y;
+					}
+				}
+			}
+			// now the most similar position of the template is (bestHitX, bestHitY). Calculate the difference from the origin:
+			let distX = bestHitX - template.xPos,
+				distY = bestHitY - template.yPos,
+				movementDiff = Math.sqrt(distX * distX + distY * distY);
+			// the maximum movement possible is a complete shift into one of the corners, i.e:
+			let maxDistX = searchWidth - template.width / 2,
+				maxDistY = searchHeight - template.height / 2,
+				maximumMovement = Math.sqrt(maxDistX * maxDistX + maxDistY * maxDistY);
+
+			// the percentage of the detected movement is therefore:
+			let movementPercentage = movementDiff / maximumMovement * 100;
+			if (movementPercentage > 100) {
+				movementPercentage = 100;
+			}
+			console.log('Calculated movement: ', movementPercentage);
+			return movementPercentage;
+		}
+
+	</script>
+
+</html>
